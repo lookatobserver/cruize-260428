@@ -54,6 +54,20 @@ html, body {
   50% { opacity: 0.4; }
 }
 
+/* ── 워터마크 ── */
+#watermark {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(30, 41, 59, 0.45);
+  letter-spacing: 0.4px;
+  z-index: 1000;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ── 저작권 ── */
 #copyright {
   position: fixed;

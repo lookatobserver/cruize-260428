@@ -258,10 +258,12 @@ window.openDetail = function () {
   set('d-gt',       s.gt       ? s.gt.toLocaleString() + ' GT' : '—');
 
   document.getElementById('detail-page').classList.add('visible');
+  document.getElementById('detail-overlay').classList.add('visible');
 };
 
 window.closeDetail = function () {
   document.getElementById('detail-page').classList.remove('visible');
+  document.getElementById('detail-overlay').classList.remove('visible');
 };
 
 // ── 목 데이터 로드 + 위치 애니메이션 ─────────────────

@@ -64,10 +64,13 @@
   <button class="detail-btn" onclick="openDetail()">상세 정보 보기 →</button>
 </div>
 
-<!-- 상세 정보 페이지 -->
+<!-- 상세 팝업 배경 -->
+<div id="detail-overlay" onclick="closeDetail()"></div>
+
+<!-- 상세 정보 팝업 -->
 <div id="detail-page">
   <div class="detail-header">
-    <button class="back-btn" onclick="closeDetail()">← 지도로 돌아가기</button>
+    <button class="back-btn" onclick="closeDetail()">✕</button>
     <h1 id="detail-name"></h1>
   </div>
   <div class="detail-body">

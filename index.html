@@ -13,11 +13,21 @@
 <!-- 지도 -->
 <div id="map"></div>
 
-<!-- 연결 상태 표시 -->
+<!-- 상단 상태바 -->
 <div id="status-bar">
   <span id="status-dot"></span>
   <span id="status-text">연결 중...</span>
-  <span id="ship-count"></span>
+  <span class="status-sep">|</span>
+  <span id="ship-count-wrap">추적 중 <strong id="ship-count">0</strong>척</span>
+  <span class="status-sep">/</span>
+  <span id="world-count-wrap">전세계 <strong id="world-count">—</strong>척</span>
+</div>
+
+<!-- 클릭 유도 힌트 -->
+<div id="click-hint">
+  <span class="hint-hand">👆</span>
+  <span class="hint-msg">선박 아이콘을 눌러보세요!</span>
+  <button class="hint-close" onclick="dismissHint()">✕</button>
 </div>
 
 <!-- 간단 정보 카드 (하단 시트) -->

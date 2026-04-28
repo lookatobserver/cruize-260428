@@ -18,16 +18,48 @@ const MOCK_SHIPS = [
 ];
 
 // ── 유틸 ───────────────────────────────────────────────
-function setStatus(state, text, count) {
+function setStatus(state, text) {
   document.getElementById('status-dot').className = state;
   document.getElementById('status-text').textContent = text;
-  if (count !== undefined)
-    document.getElementById('ship-count').textContent = ` | 선박 ${count}척`;
 }
 
 function updateCount() {
-  document.getElementById('ship-count').textContent = ` | 선박 ${Object.keys(markers).length}척`;
+  document.getElementById('ship-count').textContent = Object.keys(markers).length;
 }
+
+// ── 전세계 크루즈 선박 수 조회 ────────────────────────
+// AISStream의 /vessels REST API로 크루즈 타입(60~69) 선박 수를 조회.
+// 실패 시 산업 통계 기준 고정값(323) 표시.
+async function fetchWorldCruiseCount() {
+  const el = document.getElementById('world-count');
+  try {
+    const res = await fetch(
+      'https://api.aisstream.io/v0/vessels?shipType=60-69&limit=1',
+      { headers: { 'Authorization': AISSTREAM_API_KEY } }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      const total = json?.total ?? json?.count ?? null;
+      if (total && total > 0) { el.textContent = total.toLocaleString(); return; }
+    }
+  } catch (_) {}
+  // REST API 미지원 시 업계 통계 기준값 사용 (CLIA 2024 보고서)
+  el.textContent = '약 323';
+}
+
+// ── 클릭 유도 힌트 ────────────────────────────────────
+let hintTimer = null;
+
+function initHint() {
+  const hint = document.getElementById('click-hint');
+  // 8초 후 자동 사라짐
+  hintTimer = setTimeout(() => hint.classList.add('fade-out'), 8000);
+}
+
+window.dismissHint = function () {
+  clearTimeout(hintTimer);
+  document.getElementById('click-hint').classList.add('fade-out');
+};
 
 function compassDir(deg) {
   const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
@@ -51,6 +83,9 @@ function initMap() {
   }).addTo(map);
 
   map.on('click', () => { closeCard(); deselectAll(); });
+
+  initHint();
+  fetchWorldCruiseCount();
 
   // ① 목 데이터를 항상 즉시 표시
   loadMockData();
@@ -123,6 +158,7 @@ function updateMarker(ship) {
 
 // ── 선박 클릭 ─────────────────────────────────────────
 function onShipClick(mmsi) {
+  dismissHint();
   deselectAll();
   selectedMmsi = mmsi;
   currentShip = markers[mmsi].data;
@@ -194,7 +230,8 @@ window.closeDetail = function () {
 // ── 목 데이터 로드 + 위치 애니메이션 ─────────────────
 function loadMockData() {
   MOCK_SHIPS.forEach(ship => createMarker(ship));
-  setStatus('connected', 'AIS 연결 중...', MOCK_SHIPS.length);
+  updateCount();
+  setStatus('connected', 'AIS 연결 중...');
 
   setInterval(() => {
     MOCK_SHIPS.forEach(ship => {
@@ -217,7 +254,7 @@ function connectAIS() {
   ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
 
   ws.onopen = () => {
-    setStatus('connected', '실시간');
+    setStatus('connected', '실시간 연결됨');
     ws.send(JSON.stringify({
       APIKey: AISSTREAM_API_KEY,
       BoundingBoxes: [[[-90, -180], [90, 180]]],

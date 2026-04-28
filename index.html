@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>크루즈 실시간 추적</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="/style.css" rel="stylesheet">
 </head>
 <body>
@@ -19,7 +21,7 @@
 </div>
 
 <!-- 간단 정보 카드 (하단 시트) -->
-<div id="info-card" class="hidden">
+<div id="info-card">
   <div class="card-handle"></div>
   <div class="card-header">
     <span class="ship-emoji">🚢</span>
@@ -51,7 +53,7 @@
 </div>
 
 <!-- 상세 정보 페이지 -->
-<div id="detail-page" class="hidden">
+<div id="detail-page">
   <div class="detail-header">
     <button class="back-btn" onclick="closeDetail()">← 지도로 돌아가기</button>
     <h1 id="detail-name"></h1>
@@ -101,23 +103,13 @@
   </div>
 </div>
 
-<script src="/main.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // ★ Google Maps API 키를 여기에 입력하세요
-  // https://console.cloud.google.com → Maps JavaScript API 활성화
-  const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';
-
-  // ★ AISStream.io API 키를 여기에 입력하세요 (https://aisstream.io 에서 무료 발급)
+  // ★ AISStream.io API 키 (https://aisstream.io 에서 무료 발급)
   // 키 없으면 목 데이터(8척)로 자동 시연됩니다
-  const AISSTREAM_API_KEY = 'YOUR_AISSTREAM_API_KEY';
-
-  (function loadMaps() {
-    const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap`;
-    s.async = true;
-    s.defer = true;
-    document.head.appendChild(s);
-  })();
+  const AISSTREAM_API_KEY = '4f35de0c087f708fec9ff0b7c2a141ecca23b136';
 </script>
+<script src="/main.js"></script>
 </body>
 </html>

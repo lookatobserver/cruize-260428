@@ -3,74 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Gemini Cruise Tracker</title>
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>크루즈 실시간 추적</title>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="/style.css" rel="stylesheet">
 </head>
 <body>
 
-<!-- 지도 레이어 -->
+<!-- 지도 -->
 <div id="map"></div>
 
+<!-- 저작권 -->
+<div id="copyright">Copyright by JM</div>
 
 <!-- 상단 상태바 -->
-<div id="status-bar" class="glass-panel">
+<div id="status-bar">
   <span id="status-dot"></span>
-  <span id="status-text">Connecting...</span>
-  <span style="opacity: 0.3">|</span>
-  <span id="ship-count-wrap">Active <strong id="ship-count" style="color: var(--accent-cyan)">0</strong></span>
+  <span id="status-text">연결 중...</span>
+  <span class="status-sep">|</span>
+  <span id="ship-count-wrap">추적 중 <strong id="ship-count">0</strong>척</span>
+  <span class="status-sep">/</span>
+  <span id="world-count-wrap">전세계 <strong id="world-count">—</strong>척</span>
 </div>
 
-<!-- 하단 정보 카드 -->
-<div id="info-card" class="glass-panel">
+<!-- 클릭 유도 힌트 -->
+<div id="click-hint">
+  <span class="hint-hand">👆</span>
+  <span class="hint-msg">선박 아이콘을 눌러보세요!</span>
+  <button class="hint-close" onclick="dismissHint()">✕</button>
+</div>
+
+<!-- 간단 정보 카드 (하단 시트) -->
+<div id="info-card">
+  <div class="card-handle"></div>
   <div class="card-header">
     <span class="ship-emoji">🚢</span>
     <div class="card-title-wrap">
-      <h2 id="card-name">Select a Ship</h2>
+      <h2 id="card-name"></h2>
       <span id="card-flag"></span>
     </div>
-    <button style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;" onclick="closeCard()">✕</button>
+    <button class="close-btn" onclick="closeCard()">✕</button>
   </div>
   <div class="card-grid">
     <div class="card-item">
-      <span class="label">Speed</span>
-      <span id="card-speed" class="value">—</span>
+      <span class="label">속도</span>
+      <span id="card-speed" class="value"></span>
     </div>
     <div class="card-item">
-      <span class="label">Status</span>
-      <span id="card-status" class="value">—</span>
+      <span class="label">방향</span>
+      <span id="card-heading" class="value"></span>
+    </div>
+    <div class="card-item">
+      <span class="label">상태</span>
+      <span id="card-status" class="value"></span>
+    </div>
+    <div class="card-item">
+      <span class="label">목적지</span>
+      <span id="card-dest" class="value"></span>
     </div>
   </div>
-  <button class="detail-btn" onclick="openDetail()">View Full Details</button>
+  <button class="detail-btn" onclick="openDetail()">상세 정보 보기 →</button>
+</div>
+
+<!-- 상세 정보 페이지 -->
+<div id="detail-page">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeDetail()">← 지도로 돌아가기</button>
+    <h1 id="detail-name"></h1>
+  </div>
+  <div class="detail-body">
+    <div class="detail-hero">
+      <div class="detail-ship-icon">🚢</div>
+      <div class="detail-ship-meta">
+        <span id="detail-flag-name"></span>
+        <span class="detail-status-badge" id="detail-badge"></span>
+      </div>
+    </div>
+
+    <section class="detail-section">
+      <h3>위치 정보</h3>
+      <div class="detail-row"><span>위도</span><span id="d-lat"></span></div>
+      <div class="detail-row"><span>경도</span><span id="d-lon"></span></div>
+      <div class="detail-row"><span>현재 속도</span><span id="d-speed"></span></div>
+      <div class="detail-row"><span>선수 방향</span><span id="d-heading"></span></div>
+      <div class="detail-row"><span>침로(COG)</span><span id="d-cog"></span></div>
+    </section>
+
+    <section class="detail-section">
+      <h3>선박 정보</h3>
+      <div class="detail-row"><span>MMSI</span><span id="d-mmsi"></span></div>
+      <div class="detail-row"><span>IMO</span><span id="d-imo"></span></div>
+      <div class="detail-row"><span>콜사인</span><span id="d-callsign"></span></div>
+      <div class="detail-row"><span>선적국</span><span id="d-country"></span></div>
+      <div class="detail-row"><span>선종</span><span id="d-type"></span></div>
+    </section>
+
+    <section class="detail-section">
+      <h3>항해 정보</h3>
+      <div class="detail-row"><span>출발지</span><span id="d-origin"></span></div>
+      <div class="detail-row"><span>목적지</span><span id="d-dest"></span></div>
+      <div class="detail-row"><span>예상 도착(ETA)</span><span id="d-eta"></span></div>
+      <div class="detail-row"><span>흘수</span><span id="d-draught"></span></div>
+      <div class="detail-row"><span>마지막 업데이트</span><span id="d-updated"></span></div>
+    </section>
+
+    <section class="detail-section">
+      <h3>선체 제원</h3>
+      <div class="detail-row"><span>전장</span><span id="d-length"></span></div>
+      <div class="detail-row"><span>전폭</span><span id="d-width"></span></div>
+      <div class="detail-row"><span>총톤수</span><span id="d-gt"></span></div>
+    </section>
+  </div>
 </div>
 
 <!-- 범례 -->
-<div id="legend" class="glass-panel">
-  <div class="legend-row">
-    <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e;"></span>
-    <span>Sailing</span>
+<div id="legend">
+  <div class="legend-section">
+    <div class="legend-row"><span class="legend-emoji">🚢</span><span class="legend-text">초대형 (18만 GT+)</span></div>
+    <div class="legend-row"><span class="legend-emoji">🛳️</span><span class="legend-text">대형 (10~18만 GT)</span></div>
+    <div class="legend-row"><span class="legend-emoji">⛴️</span><span class="legend-text">중소형 (10만 GT↓)</span></div>
   </div>
-  <div class="legend-row">
-    <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
-    <span>Arriving</span>
-  </div>
-  <div class="legend-row">
-    <span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span>
-    <span>Moored</span>
+  <div class="legend-divider"></div>
+  <div class="legend-section">
+    <div class="legend-row"><span class="legend-dot" style="background:#22c55e"></span><span class="legend-text">항해 중</span></div>
+    <div class="legend-row"><span class="legend-dot" style="background:#f59e0b"></span><span class="legend-text">입항 중</span></div>
+    <div class="legend-row"><span class="legend-dot" style="background:#94a3b8"></span><span class="legend-text">정박 중</span></div>
   </div>
 </div>
-
-<!-- 상세 페이지 (생략 가능하나 구조 유지) -->
-<div id="detail-page" style="display:none;"></div> 
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+  // ★ AISStream.io API 키 (https://aisstream.io 에서 무료 발급)
+  // 키 없으면 목 데이터(8척)로 자동 시연됩니다
   const AISSTREAM_API_KEY = '4f35de0c087f708fec9ff0b7c2a141ecca23b136';
 </script>
 <script src="/main.js"></script>

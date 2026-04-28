@@ -54,6 +54,52 @@ html, body {
 
 #ship-count { color: #2563eb; font-weight: 700; }
 
+/* ── 범례 ── */
+#legend {
+  position: fixed;
+  bottom: 24px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.93);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.13);
+  z-index: 1000;
+  min-width: 148px;
+}
+
+.legend-section { display: flex; flex-direction: column; gap: 7px; }
+
+.legend-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 9px 0;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.legend-emoji { font-size: 17px; line-height: 1; width: 20px; text-align: center; }
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.9);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  margin-left: 4px;
+}
+
+.legend-text { line-height: 1; }
+
 /* ── 선박 마커 ── */
 .leaflet-ship-icon {
   background: none !important;

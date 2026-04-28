@@ -134,40 +134,40 @@ html, body {
 /* ── 범례 ── */
 #legend {
   position: fixed;
-  top: 14px;
-  right: 16px;
+  bottom: 20px;
+  right: 14px;
   background: rgba(255, 255, 255, 0.93);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 14px;
-  padding: 12px 14px;
-  box-shadow: 0 2px 14px rgba(0,0,0,0.13);
+  border-radius: 11px;
+  padding: 9px 11px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
   z-index: 1000;
-  min-width: 148px;
+  min-width: 128px;
 }
 
-.legend-section { display: flex; flex-direction: column; gap: 7px; }
+.legend-section { display: flex; flex-direction: column; gap: 5px; }
 
 .legend-divider {
   height: 1px;
   background: rgba(0,0,0,0.08);
-  margin: 9px 0;
+  margin: 6px 0;
 }
 
 .legend-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11px;
   color: #334155;
   font-weight: 500;
 }
 
-.legend-emoji { font-size: 17px; line-height: 1; width: 20px; text-align: center; }
+.legend-emoji { font-size: 14px; line-height: 1; width: 17px; text-align: center; }
 
 .legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
   border: 1.5px solid rgba(255,255,255,0.9);

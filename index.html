@@ -3,199 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>크루즈 실시간 추적</title>
+  <title>Gemini Cruise Tracker</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="/style.css" rel="stylesheet">
 </head>
 <body>
 
-<!-- 지도 -->
+<!-- 지도 레이어 -->
 <div id="map"></div>
 
-<!-- 로고 -->
+<!-- 로고 (Pirates of the Caribbean Style) -->
 <div id="logo">
-  <svg id="logo-svg" viewBox="0 0 210 52" xmlns="http://www.w3.org/2000/svg">
-    <!-- 배경 pill -->
-    <rect x="0" y="0" width="210" height="52" rx="14" fill="url(#lgBg)"/>
+  <svg id="logo-svg" viewBox="0 0 242 62" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="lgBg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%"   stop-color="#0c4a8a"/>
-        <stop offset="100%" stop-color="#1e3a5f"/>
+      <!-- 어두운 가죽/목재 배경 -->
+      <linearGradient id="lgBg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%"   stop-color="#1a0600"/>
+        <stop offset="50%"  stop-color="#2e1100"/>
+        <stop offset="100%" stop-color="#1a0600"/>
       </linearGradient>
-      <linearGradient id="lgGold" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#fcd34d"/>
-        <stop offset="100%" stop-color="#f59e0b"/>
+      <!-- 황금 그라디언트 -->
+      <linearGradient id="lgGold" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%"   stop-color="#fde68a"/>
+        <stop offset="45%"  stop-color="#f59e0b"/>
+        <stop offset="100%" stop-color="#92400e"/>
+      </linearGradient>
+      <!-- 붉은 배지용 -->
+      <linearGradient id="lgRed" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%"   stop-color="#b91c1c"/>
+        <stop offset="100%" stop-color="#450a0a"/>
+      </linearGradient>
+      <!-- 빛 반사 -->
+      <linearGradient id="lgShine" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%"   stop-color="rgba(255,220,100,0.12)"/>
+        <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
       </linearGradient>
     </defs>
 
-    <!-- 파도 (배경 장식) -->
-    <path d="M0 40 Q26 34 52 40 Q78 46 104 40 Q130 34 156 40 Q182 46 210 40 L210 52 L0 52 Z"
-          fill="rgba(255,255,255,0.06)"/>
+    <!-- 배경 pill -->
+    <rect x="0"  y="0"  width="242" height="62" rx="13" fill="url(#lgBg)"/>
+    <!-- 상단 광택 -->
+    <rect x="0"  y="0"  width="242" height="31" rx="13" fill="url(#lgShine)"/>
+    <!-- 금색 밧줄 테두리 (점선) -->
+    <rect x="2"  y="2"  width="238" height="58" rx="11"
+          fill="none" stroke="url(#lgGold)" stroke-width="1.2"
+          stroke-dasharray="5 2.5" opacity="0.55"/>
+    <!-- 안쪽 가는 테두리 -->
+    <rect x="4"  y="4"  width="234" height="54" rx="9"
+          fill="none" stroke="rgba(253,230,138,0.12)" stroke-width="0.8"/>
 
-    <!-- 닻 아이콘 -->
-    <g transform="translate(13,26)">
-      <!-- 닻 몸통 -->
-      <line x1="0" y1="-11" x2="0" y2="11" stroke="url(#lgGold)" stroke-width="2.2" stroke-linecap="round"/>
-      <!-- 닻 가로대 -->
-      <line x1="-7" y1="-8" x2="7" y2="-8" stroke="url(#lgGold)" stroke-width="2" stroke-linecap="round"/>
-      <!-- 닻 링 -->
-      <circle cx="0" cy="-13" r="2.5" fill="none" stroke="url(#lgGold)" stroke-width="1.8"/>
-      <!-- 닻 아래 곡선 -->
-      <path d="M-8 5 Q-9 11 0 11 Q9 11 8 5" fill="none" stroke="url(#lgGold)" stroke-width="2" stroke-linecap="round"/>
-    </g>
+    <!-- ── 선박 키(Helm Wheel) cx=33 cy=31 ── -->
+    <!-- 바깥 링 -->
+    <circle cx="33" cy="31" r="15" fill="none" stroke="url(#lgGold)" stroke-width="1.8"/>
+    <!-- 안쪽 장식 링 -->
+    <circle cx="33" cy="31" r="11" fill="none" stroke="rgba(253,230,138,0.2)" stroke-width="0.8"/>
+    <!-- 허브 -->
+    <circle cx="33" cy="31" r="4"  fill="#1a0600" stroke="url(#lgGold)" stroke-width="1.5"/>
+    <circle cx="33" cy="31" r="1.8" fill="url(#lgGold)" opacity="0.7"/>
+    <!-- 8 스포크 -->
+    <line x1="33" y1="16" x2="33" y2="46" stroke="url(#lgGold)" stroke-width="1.3" stroke-linecap="round"/>
+    <line x1="18" y1="31" x2="48" y2="31" stroke="url(#lgGold)" stroke-width="1.3" stroke-linecap="round"/>
+    <line x1="22.4" y1="20.4" x2="43.6" y2="41.6" stroke="url(#lgGold)" stroke-width="1.3" stroke-linecap="round"/>
+    <line x1="43.6" y1="20.4" x2="22.4" y2="41.6" stroke="url(#lgGold)" stroke-width="1.3" stroke-linecap="round"/>
+    <!-- 8개 핸들 페그 -->
+    <circle cx="33"   cy="13"   r="2.5" fill="url(#lgGold)"/>
+    <circle cx="33"   cy="49"   r="2.5" fill="url(#lgGold)"/>
+    <circle cx="15"   cy="31"   r="2.5" fill="url(#lgGold)"/>
+    <circle cx="51"   cy="31"   r="2.5" fill="url(#lgGold)"/>
+    <circle cx="21"   cy="18.5" r="2.5" fill="url(#lgGold)"/>
+    <circle cx="45"   cy="43.5" r="2.5" fill="url(#lgGold)"/>
+    <circle cx="45"   cy="18.5" r="2.5" fill="url(#lgGold)"/>
+    <circle cx="21"   cy="43.5" r="2.5" fill="url(#lgGold)"/>
 
-    <!-- 텍스트: 율리시즈크루즈 -->
-    <text x="30" y="22"
-          font-family="'Apple SD Gothic Neo','Noto Sans KR',sans-serif"
-          font-size="13" font-weight="800"
-          letter-spacing="0.5"
-          fill="white">율리시즈크루즈</text>
+    <!-- ── 구분선 ── -->
+    <line x1="60" y1="10" x2="60" y2="52" stroke="url(#lgGold)" stroke-width="0.8" opacity="0.45"/>
+    <!-- 구분선 위아래 다이아몬드 -->
+    <polygon points="60,7 62.2,9.5 60,12 57.8,9.5"  fill="url(#lgGold)" opacity="0.7"/>
+    <polygon points="60,50 62.2,52.5 60,55 57.8,52.5" fill="url(#lgGold)" opacity="0.7"/>
 
-    <!-- MAP 배지 -->
-    <rect x="30" y="28" width="34" height="14" rx="4" fill="url(#lgGold)"/>
-    <text x="47" y="39.5"
-          font-family="'Arial Black',Arial,sans-serif"
-          font-size="9" font-weight="900"
+    <!-- ── 메인 텍스트: ULYSSES ── -->
+    <text x="68" y="28"
+          font-family="'Cinzel','Palatino Linotype','Times New Roman',serif"
+          font-size="18" font-weight="900"
+          fill="url(#lgGold)" letter-spacing="2.5">ULYSSES</text>
+
+    <!-- ── 서브 텍스트: CRUISE ── -->
+    <text x="69" y="42"
+          font-family="'Cinzel','Palatino Linotype','Times New Roman',serif"
+          font-size="9.5" font-weight="700"
+          fill="url(#lgGold)" letter-spacing="5" opacity="0.8">CRUISE</text>
+
+    <!-- ── MAP 배지 ── -->
+    <rect x="158" y="19" width="40" height="22" rx="5" fill="url(#lgRed)"/>
+    <rect x="158" y="19" width="40" height="22" rx="5"
+          fill="none" stroke="url(#lgGold)" stroke-width="0.9" opacity="0.7"/>
+    <!-- 배지 안 광택 -->
+    <rect x="160" y="20" width="36" height="8" rx="3" fill="rgba(255,255,255,0.06)"/>
+    <text x="178" y="34"
+          font-family="'Cinzel','Times New Roman',serif"
+          font-size="10" font-weight="900"
           text-anchor="middle"
-          fill="#1e3a5f">MAP</text>
+          fill="url(#lgGold)" letter-spacing="2">MAP</text>
 
-    <!-- 작은 파도 + 배 -->
-    <g transform="translate(98,34)">
-      <path d="M0 0 Q5-3 10 0 Q15 3 20 0" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.3" stroke-linecap="round"/>
-      <path d="M5 0 Q5-3 10-3 Q15-3 15 0 Z" fill="rgba(255,255,255,0.2)"/>
-      <text x="10" y="-6" font-size="11" text-anchor="middle" fill="rgba(255,255,255,0.5)">🚢</text>
-    </g>
+    <!-- ── 해적 해골 ☠ ── -->
+    <text x="210" y="37" font-size="20" text-anchor="middle"
+          fill="rgba(253,230,138,0.35)" style="filter:drop-shadow(0 0 3px rgba(245,158,11,0.4))">☠</text>
 
-    <!-- Copyright 텍스트 -->
-    <text x="198" y="46"
-          font-family="Arial,sans-serif"
-          font-size="7" font-weight="400"
-          text-anchor="end"
-          fill="rgba(255,255,255,0.35)">© JM</text>
+    <!-- ── 하단 파도 장식 ── -->
+    <path d="M68 52 Q82 48 96 52 Q110 56 124 52 Q138 48 152 52"
+          fill="none" stroke="url(#lgGold)" stroke-width="0.9"
+          stroke-linecap="round" opacity="0.25"/>
+
+    <!-- ── © JM ── -->
+    <text x="238" y="58"
+          font-family="Arial,sans-serif" font-size="6.5"
+          text-anchor="end" fill="rgba(253,230,138,0.28)">© JM</text>
   </svg>
 </div>
 
 <!-- 상단 상태바 -->
-<div id="status-bar">
+<div id="status-bar" class="glass-panel">
   <span id="status-dot"></span>
-  <span id="status-text">연결 중...</span>
-  <span class="status-sep">|</span>
-  <span id="ship-count-wrap">추적 중 <strong id="ship-count">0</strong>척</span>
-  <span class="status-sep">/</span>
-  <span id="world-count-wrap">전세계 <strong id="world-count">—</strong>척</span>
+  <span id="status-text">Connecting...</span>
+  <span style="opacity: 0.3">|</span>
+  <span id="ship-count-wrap">Active <strong id="ship-count" style="color: var(--accent-cyan)">0</strong></span>
 </div>
 
-<!-- 클릭 유도 힌트 -->
-<div id="click-hint">
-  <span class="hint-hand">👆</span>
-  <span class="hint-msg">선박 아이콘을 눌러보세요!</span>
-  <button class="hint-close" onclick="dismissHint()">✕</button>
-</div>
-
-<!-- 간단 정보 카드 (하단 시트) -->
-<div id="info-card">
-  <div class="card-handle"></div>
+<!-- 하단 정보 카드 -->
+<div id="info-card" class="glass-panel">
   <div class="card-header">
     <span class="ship-emoji">🚢</span>
     <div class="card-title-wrap">
-      <h2 id="card-name"></h2>
+      <h2 id="card-name">Select a Ship</h2>
       <span id="card-flag"></span>
     </div>
-    <button class="close-btn" onclick="closeCard()">✕</button>
+    <button style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;" onclick="closeCard()">✕</button>
   </div>
   <div class="card-grid">
     <div class="card-item">
-      <span class="label">속도</span>
-      <span id="card-speed" class="value"></span>
+      <span class="label">Speed</span>
+      <span id="card-speed" class="value">—</span>
     </div>
     <div class="card-item">
-      <span class="label">방향</span>
-      <span id="card-heading" class="value"></span>
-    </div>
-    <div class="card-item">
-      <span class="label">상태</span>
-      <span id="card-status" class="value"></span>
-    </div>
-    <div class="card-item">
-      <span class="label">목적지</span>
-      <span id="card-dest" class="value"></span>
+      <span class="label">Status</span>
+      <span id="card-status" class="value">—</span>
     </div>
   </div>
-  <button class="detail-btn" onclick="openDetail()">상세 정보 보기 →</button>
-</div>
-
-<!-- 상세 정보 페이지 -->
-<div id="detail-page">
-  <div class="detail-header">
-    <button class="back-btn" onclick="closeDetail()">← 지도로 돌아가기</button>
-    <h1 id="detail-name"></h1>
-  </div>
-  <div class="detail-body">
-    <div class="detail-hero">
-      <div class="detail-ship-icon">🚢</div>
-      <div class="detail-ship-meta">
-        <span id="detail-flag-name"></span>
-        <span class="detail-status-badge" id="detail-badge"></span>
-      </div>
-    </div>
-
-    <section class="detail-section">
-      <h3>위치 정보</h3>
-      <div class="detail-row"><span>위도</span><span id="d-lat"></span></div>
-      <div class="detail-row"><span>경도</span><span id="d-lon"></span></div>
-      <div class="detail-row"><span>현재 속도</span><span id="d-speed"></span></div>
-      <div class="detail-row"><span>선수 방향</span><span id="d-heading"></span></div>
-      <div class="detail-row"><span>침로(COG)</span><span id="d-cog"></span></div>
-    </section>
-
-    <section class="detail-section">
-      <h3>선박 정보</h3>
-      <div class="detail-row"><span>MMSI</span><span id="d-mmsi"></span></div>
-      <div class="detail-row"><span>IMO</span><span id="d-imo"></span></div>
-      <div class="detail-row"><span>콜사인</span><span id="d-callsign"></span></div>
-      <div class="detail-row"><span>선적국</span><span id="d-country"></span></div>
-      <div class="detail-row"><span>선종</span><span id="d-type"></span></div>
-    </section>
-
-    <section class="detail-section">
-      <h3>항해 정보</h3>
-      <div class="detail-row"><span>출발지</span><span id="d-origin"></span></div>
-      <div class="detail-row"><span>목적지</span><span id="d-dest"></span></div>
-      <div class="detail-row"><span>예상 도착(ETA)</span><span id="d-eta"></span></div>
-      <div class="detail-row"><span>흘수</span><span id="d-draught"></span></div>
-      <div class="detail-row"><span>마지막 업데이트</span><span id="d-updated"></span></div>
-    </section>
-
-    <section class="detail-section">
-      <h3>선체 제원</h3>
-      <div class="detail-row"><span>전장</span><span id="d-length"></span></div>
-      <div class="detail-row"><span>전폭</span><span id="d-width"></span></div>
-      <div class="detail-row"><span>총톤수</span><span id="d-gt"></span></div>
-    </section>
-  </div>
+  <button class="detail-btn" onclick="openDetail()">View Full Details</button>
 </div>
 
 <!-- 범례 -->
-<div id="legend">
-  <div class="legend-section">
-    <div class="legend-row"><span class="legend-emoji">🚢</span><span class="legend-text">초대형 (18만 GT+)</span></div>
-    <div class="legend-row"><span class="legend-emoji">🛳️</span><span class="legend-text">대형 (10~18만 GT)</span></div>
-    <div class="legend-row"><span class="legend-emoji">⛴️</span><span class="legend-text">중소형 (10만 GT↓)</span></div>
+<div id="legend" class="glass-panel">
+  <div class="legend-row">
+    <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e;"></span>
+    <span>Sailing</span>
   </div>
-  <div class="legend-divider"></div>
-  <div class="legend-section">
-    <div class="legend-row"><span class="legend-dot" style="background:#22c55e"></span><span class="legend-text">항해 중</span></div>
-    <div class="legend-row"><span class="legend-dot" style="background:#f59e0b"></span><span class="legend-text">입항 중</span></div>
-    <div class="legend-row"><span class="legend-dot" style="background:#94a3b8"></span><span class="legend-text">정박 중</span></div>
+  <div class="legend-row">
+    <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
+    <span>Arriving</span>
+  </div>
+  <div class="legend-row">
+    <span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span>
+    <span>Moored</span>
   </div>
 </div>
+
+<!-- 상세 페이지 (생략 가능하나 구조 유지) -->
+<div id="detail-page" style="display:none;"></div> 
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // ★ AISStream.io API 키 (https://aisstream.io 에서 무료 발급)
-  // 키 없으면 목 데이터(8척)로 자동 시연됩니다
   const AISSTREAM_API_KEY = '4f35de0c087f708fec9ff0b7c2a141ecca23b136';
 </script>
 <script src="/main.js"></script>

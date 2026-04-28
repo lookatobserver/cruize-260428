@@ -105,25 +105,6 @@ body::after {
   50% { opacity: 0.5; transform: scale(1.2); }
 }
 
-/* ── 로고 ── */
-#logo {
-  position: fixed;
-  top: 14px;
-  left: 14px;
-  z-index: 1000;
-  filter: drop-shadow(0 3px 12px rgba(180,83,9,0.45));
-  transition: filter 0.25s ease, transform 0.25s ease;
-  cursor: default;
-}
-#logo:hover {
-  filter: drop-shadow(0 4px 18px rgba(245,158,11,0.65));
-  transform: scale(1.025);
-}
-#logo-svg {
-  width: 194px;
-  height: 50px;
-  display: block;
-}
 
 /* ── 범례 ── */
 #legend {

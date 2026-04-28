@@ -25,13 +25,16 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(10, 22, 40, 0.85);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 20px;
   padding: 6px 16px;
   font-size: 13px;
-  z-index: 100;
+  font-weight: 500;
+  color: #1e293b;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  z-index: 1000;
   white-space: nowrap;
 }
 
@@ -49,58 +52,83 @@ html, body {
   50% { opacity: 0.4; }
 }
 
-#ship-count { color: #60a5fa; font-weight: 600; }
+#ship-count { color: #2563eb; font-weight: 700; }
 
 /* ── 선박 마커 ── */
 .leaflet-ship-icon {
   background: none !important;
   border: none !important;
+  overflow: visible !important;
 }
 
-.ship-emoji-pin {
-  font-size: 28px;
-  display: block;
-  line-height: 1;
+.ship-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   cursor: pointer;
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.7));
-  transition: transform 0.15s, filter 0.15s;
+  transition: transform 0.15s;
   user-select: none;
   -webkit-user-select: none;
 }
-.ship-emoji-pin:hover {
-  transform: scale(1.35);
+.ship-pin:hover { transform: scale(1.3); }
+
+.ship-pin-emoji {
+  font-size: 28px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+  display: block;
 }
-.ship-emoji-pin.selected {
-  filter: drop-shadow(0 0 8px #60a5fa) drop-shadow(0 2px 5px rgba(0,0,0,0.7));
-  transform: scale(1.2);
-  animation: selected-bounce 0.4s ease;
+
+/* 상태 점 */
+.ship-pin-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 2px;
+  border: 1.5px solid rgba(255,255,255,0.9);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  display: block;
+  flex-shrink: 0;
 }
+
+/* 선택 상태 */
+.ship-pin.selected {
+  transform: scale(1.25);
+  animation: selected-bounce 0.4s ease forwards;
+}
+.ship-pin.selected .ship-pin-emoji {
+  filter: drop-shadow(0 0 7px #3b82f6) drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+}
+.ship-pin.selected .ship-pin-dot {
+  box-shadow: 0 0 6px 2px rgba(59,130,246,0.6), 0 1px 3px rgba(0,0,0,0.35);
+}
+
 @keyframes selected-bounce {
   0%   { transform: scale(1); }
   50%  { transform: scale(1.45); }
-  100% { transform: scale(1.2); }
+  100% { transform: scale(1.25); }
 }
 
 /* ── Leaflet 툴팁 커스텀 ── */
 .ship-tooltip {
-  background: rgba(10, 22, 40, 0.9);
-  border: 1px solid rgba(96,165,250,0.4);
-  color: #fff;
+  background: rgba(15, 23, 42, 0.88);
+  border: none;
+  color: #f1f5f9;
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 4px 9px;
   border-radius: 6px;
   white-space: nowrap;
-  box-shadow: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 .ship-tooltip::before { display: none; }
 
-/* Leaflet 기본 attribution 다크 처리 */
+/* Leaflet attribution */
 .leaflet-control-attribution {
-  background: rgba(10, 22, 40, 0.7) !important;
+  background: rgba(255,255,255,0.8) !important;
   color: #64748b !important;
+  font-size: 10px !important;
 }
-.leaflet-control-attribution a { color: #60a5fa !important; }
 
 /* ── 하단 카드 ── */
 #info-card {

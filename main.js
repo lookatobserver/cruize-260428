@@ -43,7 +43,8 @@ function initMap() {
     attributionControl: true,
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  // 밝은 지도 타일 (CartoDB Positron)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19,
@@ -63,19 +64,40 @@ function initMap() {
   }
 }
 
+// ── 아이콘 선택 로직 ──────────────────────────────────
+// GT 기준 이모지: 대형(🚢) / 중형(🛳️) / 소형·페리(⛴️)
+function shipEmoji(ship) {
+  const gt = ship.gt || 0;
+  if (gt >= 180000) return '🚢';
+  if (gt >= 100000) return '🛳️';
+  return '⛴️';
+}
+
+// 항해 상태별 컬러 점
+function statusColor(status) {
+  if (!status || status.includes('항해') || status.includes('순항')) return '#22c55e'; // 녹색
+  if (status.includes('입항'))  return '#f59e0b'; // 주황
+  return '#94a3b8'; // 회색 (정박·기타)
+}
+
 // ── 마커 아이콘 ───────────────────────────────────────
-function makeIcon(selected) {
+function makeIcon(ship, selected) {
+  const emoji = shipEmoji(ship);
+  const dot   = statusColor(ship.status);
   return L.divIcon({
     className: 'leaflet-ship-icon',
-    html: `<span class="ship-emoji-pin${selected ? ' selected' : ''}">🚢</span>`,
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
+    html: `<div class="ship-pin${selected ? ' selected' : ''}">
+             <span class="ship-pin-emoji">${emoji}</span>
+             <span class="ship-pin-dot" style="background:${dot}"></span>
+           </div>`,
+    iconSize: [38, 44],
+    iconAnchor: [19, 40],
   });
 }
 
 // ── 마커 생성 ─────────────────────────────────────────
 function createMarker(ship) {
-  const m = L.marker([ship.lat, ship.lon], { icon: makeIcon(false) })
+  const m = L.marker([ship.lat, ship.lon], { icon: makeIcon(ship, false) })
     .addTo(map)
     .on('click', (e) => { L.DomEvent.stopPropagation(e); onShipClick(ship.mmsi); });
 
@@ -104,14 +126,14 @@ function onShipClick(mmsi) {
   deselectAll();
   selectedMmsi = mmsi;
   currentShip = markers[mmsi].data;
-  markers[mmsi].marker.setIcon(makeIcon(true));
+  markers[mmsi].marker.setIcon(makeIcon(currentShip, true));
   map.panTo(markers[mmsi].marker.getLatLng(), { animate: true, duration: 0.5 });
   showCard(currentShip);
 }
 
 function deselectAll() {
   if (selectedMmsi && markers[selectedMmsi]) {
-    markers[selectedMmsi].marker.setIcon(makeIcon(false));
+    markers[selectedMmsi].marker.setIcon(makeIcon(markers[selectedMmsi].data, false));
   }
   selectedMmsi = null;
 }

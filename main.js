@@ -5,6 +5,35 @@ let selectedMmsi = null;
 let currentShip = null;
 let ws = null;
 
+// ── 항구 좌표 ─────────────────────────────────────────
+const PORT_COORDS = {
+  'MIAMI':           [ 25.762, -80.192], 'NASSAU':         [ 25.044, -77.350],
+  'COCO CAY':        [ 25.828, -77.683], 'SAN JUAN':       [ 18.466, -66.106],
+  'PORT CANAVERAL':  [ 28.416, -80.589], 'FT LAUDERDALE':  [ 26.122, -80.137],
+  'GALVESTON':       [ 29.301, -94.798], 'ST THOMAS':      [ 18.342, -64.931],
+  'ST MAARTEN':      [ 18.043, -63.055], 'COSTA MAYA':     [ 18.728, -87.707],
+  'COZUMEL':         [ 20.510, -86.957], 'HONOLULU':       [ 21.307,-157.858],
+  'LAHAINA':         [ 20.878,-156.683], 'GENOVA':         [ 44.406,   8.946],
+  'VALLETTA':        [ 35.900,  14.515], 'PALERMO':        [ 38.111,  13.352],
+  'MARSEILLE':       [ 43.297,   5.370], 'BARCELONA':      [ 41.385,   2.173],
+  'PIRAEUS':         [ 37.943,  23.646], 'CIVITAVECCHIA':  [ 42.094,  11.794],
+  'CATANIA':         [ 37.502,  15.087], 'SALERNO':        [ 40.682,  14.768],
+  'CORFU':           [ 39.624,  19.922], 'SAVONA':         [ 44.307,   8.480],
+  'HAMBURG':         [ 53.575,  10.015], 'TENERIFE':       [ 28.464, -16.252],
+  'DOVER':           [ 51.130,   1.309], 'SOUTHAMPTON':    [ 50.910,  -1.404],
+  'NEW YORK':        [ 40.713, -74.006], 'OSLO':           [ 59.914,  10.752],
+  'KIEL':            [ 54.323,  10.123], 'SINGAPORE':      [  1.352, 103.820],
+  'HONG KONG':       [ 22.319, 114.169], 'KOBE':           [ 34.690, 135.196],
+  'YOKOHAMA':        [ 35.444, 139.638], 'TOKYO':          [ 35.676, 139.650],
+  'BUSAN':           [ 35.180, 129.076], 'SYDNEY':         [-33.869, 151.209],
+  'AUCKLAND':        [-36.849, 174.763], 'SHANGHAI':       [ 31.230, 121.474],
+  'SEATTLE':         [ 47.606,-122.332], 'JUNEAU':         [ 58.301,-134.420],
+  'VANCOUVER':       [ 49.283,-123.121], 'SEWARD':         [ 60.104,-149.444],
+  'MONTEVIDEO':      [-34.901, -56.188], 'BUENOS AIRES':   [-34.604, -58.382],
+  'WILLEMSTAD':      [ 12.102, -68.934], 'BRIDGETOWN':     [ 13.113, -59.599],
+  'ROTTERDAM':       [ 51.922,   4.479],
+};
+
 // ── 목 데이터 (35척 — 실제 운항 중인 크루즈선 기반) ──
 const MOCK_SHIPS = [
   // ── 카리브해 ─────────────────────────────────────────
@@ -53,6 +82,31 @@ const MOCK_SHIPS = [
   { mmsi:'311041000', name:'NIEUW STATENDAM',        lat:12.10, lon:-61.65, speed:13.5, heading:315, cog:316, status:'항해 중', dest:'BRIDGETOWN',   origin:'WILLEMSTAD',  flag:'🇧🇸', country:'바하마',   imo:'9778861', callsign:'C6FR5',  type:'크루즈여객선', length:297, width:35, gt:99500,  draught:7.9, eta:'04-29 06:00' },
   { mmsi:'244877000', name:'ROTTERDAM',              lat:52.00, lon:  4.10, speed: 0.0, heading: 90, cog: 90, status:'정박 중', dest:'ROTTERDAM',    origin:'SOUTHAMPTON', flag:'🇳🇱', country:'네덜란드', imo:'9692569', callsign:'PDRR',   type:'크루즈여객선', length:297, width:35, gt:99800,  draught:8.0, eta:'04-28 16:00' },
 ];
+
+// ── 경로선 ────────────────────────────────────────────
+function drawRoute(ship) {
+  const oc = PORT_COORDS[(ship.origin || '').toUpperCase()];
+  const dc = PORT_COORDS[(ship.dest   || '').toUpperCase()];
+  if (!oc || !dc) return null;
+
+  return L.polyline([oc, [ship.lat, ship.lon], dc], {
+    color: '#64748b',
+    weight: 1.5,
+    opacity: 0.22,
+    dashArray: '5 8',
+    lineCap: 'round',
+  }).addTo(map);
+}
+
+function highlightRoute(mmsi, on) {
+  const r = markers[mmsi]?.route;
+  if (!r) return;
+  r.setStyle(on
+    ? { color: '#3b82f6', opacity: 0.55, weight: 2, dashArray: '6 6' }
+    : { color: '#64748b', opacity: 0.22, weight: 1.5, dashArray: '5 8' }
+  );
+  if (on) r.bringToFront();
+}
 
 // ── 유틸 ───────────────────────────────────────────────
 function setStatus(state, text) {
@@ -180,7 +234,8 @@ function createMarker(ship) {
     offset: [0, -6],
   });
 
-  markers[ship.mmsi] = { marker: m, data: { ...ship } };
+  const route = drawRoute(ship);
+  markers[ship.mmsi] = { marker: m, data: { ...ship }, route };
 }
 
 // ── 마커 업데이트 ─────────────────────────────────────
@@ -200,6 +255,7 @@ function onShipClick(mmsi) {
   selectedMmsi = mmsi;
   currentShip = markers[mmsi].data;
   markers[mmsi].marker.setIcon(makeIcon(currentShip, true));
+  highlightRoute(mmsi, true);
   map.panTo(markers[mmsi].marker.getLatLng(), { animate: true, duration: 0.5 });
   showCard(currentShip);
 }
@@ -207,6 +263,7 @@ function onShipClick(mmsi) {
 function deselectAll() {
   if (selectedMmsi && markers[selectedMmsi]) {
     markers[selectedMmsi].marker.setIcon(makeIcon(markers[selectedMmsi].data, false));
+    highlightRoute(selectedMmsi, false);
   }
   selectedMmsi = null;
 }
